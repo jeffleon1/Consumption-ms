@@ -12,11 +12,20 @@ import (
 )
 
 func main() {
-	port := config.Config.APP
-	powerConsumptionPostgresRepository := repositories.NewPostgreSQLPowerConsumptionRepository()
-	powerConsumptionService := application.NewPowerConsumptionService(&powerConsumptionPostgresRepository)
-	powerConsumptionHandler := infraestructure.NewPowerConsumptionHandler(&powerConsumptionService)
-	powerConsumptionRoutes := infraestructure.NewRoutes(&powerConsumptionHandler)
+	port := config.Config.APP.PORT
+	db, err := config.Config.DatabaseInit()
+	if err != nil {
+		logrus.Fatalf("Fatal Error: the database could not connect %s", err.Error())
+	}
+	powerConsumptionPostgresRepository := repositories.NewPostgreSQLPowerConsumptionRepository(db)
+	err = powerConsumptionPostgresRepository.ModelMigration()
+	if err != nil {
+		logrus.Fatalf("Fatal Error: It was not possible to migrate the model %s", err.Error())
+	}
+	powerConsumptionCSVRepository := repositories.NewCSVConsumptionRepository()
+	powerConsumptionService := application.NewPowerConsumptionService(powerConsumptionPostgresRepository, powerConsumptionCSVRepository)
+	powerConsumptionHandler := infraestructure.NewPowerConsumptionHandler(powerConsumptionService)
+	powerConsumptionRoutes := infraestructure.NewRoutes(powerConsumptionHandler)
 
 	r := router.NewRouter(router.RoutesGroup{
 		PowerConsumption: powerConsumptionRoutes,
