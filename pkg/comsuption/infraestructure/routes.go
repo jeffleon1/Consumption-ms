@@ -7,7 +7,8 @@ type PowerConsumptionRoutes struct {
 }
 
 func (ro *PowerConsumptionRoutes) RegisterRoutes(public *gin.RouterGroup) {
-	//Implementation soon
+	public.GET("/example", ro.powerConsumptionHandler.GetConsumptionByMeterIDAndWindowTime)
+	public.POST("/", ro.powerConsumptionHandler.ImportCsvToDatabase)
 }
 
 func NewRoutes(powerConsumptionHandler *PowerConsumptionHandlerImpl) *PowerConsumptionRoutes {
