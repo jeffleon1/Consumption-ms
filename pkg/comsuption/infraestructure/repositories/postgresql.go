@@ -19,9 +19,9 @@ func NewPostgreSQLPowerConsumptionRepository(db *gorm.DB) domain.PostgresPowerCo
 	}
 }
 
-func (p *PostgreSQLPowerConsumptionRepositoryImpl) GetConsumptionByMeterIDAndWindowTime(startDate string, endDate string) ([]domain.UserConsumption, error) {
+func (p *PostgreSQLPowerConsumptionRepositoryImpl) GetConsumptionByMeterIDAndWindowTime(startDate, endDate time.Time, meterID int) ([]domain.UserConsumption, error) {
 	var userPowerConsumption []domain.UserConsumption
-	err := p.db.Where("date BETWEEN ? AND ?", startDate, endDate).Find(&userPowerConsumption).Error
+	err := p.db.Where("date BETWEEN ? AND ? AND meter_id=?", startDate, endDate, meterID).Find(&userPowerConsumption).Error
 	if err != nil {
 		return nil, err
 	}
