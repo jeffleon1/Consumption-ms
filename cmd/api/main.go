@@ -17,13 +17,13 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Fatal Error: the database could not connect %s", err.Error())
 	}
-	powerConsumptionPostgresRepository := repositories.NewPostgreSQLPowerConsumptionRepository(db)
-	err = powerConsumptionPostgresRepository.ModelMigration()
+	powerConsumptionMySQLRepository := repositories.NewMySQLPowerConsumptionRepository(db)
+	err = powerConsumptionMySQLRepository.ModelMigration()
 	if err != nil {
 		logrus.Fatalf("Fatal Error: It was not possible to migrate the model %s", err.Error())
 	}
 	powerConsumptionCSVRepository := repositories.NewCSVConsumptionRepository()
-	powerConsumptionService := application.NewPowerConsumptionService(powerConsumptionPostgresRepository, powerConsumptionCSVRepository)
+	powerConsumptionService := application.NewPowerConsumptionService(powerConsumptionMySQLRepository, powerConsumptionCSVRepository)
 	powerConsumptionHandler := infraestructure.NewPowerConsumptionHandler(powerConsumptionService)
 	powerConsumptionRoutes := infraestructure.NewRoutes(powerConsumptionHandler)
 
