@@ -6,7 +6,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +32,7 @@ type DB struct {
 	USER     string `env:"DB_USER" envDefault:"bia"`
 	PASSWORD string `env:"DB_PASSWORD" envDefault:""`
 	DBNAME   string `env:"DB_NAME" envDefault:"power_consumption"`
-	PORT     string `env:"DB_PORT" envDefault:"5432"`
+	PORT     string `env:"DB_PORT" envDefault:"3306"`
 	SSLMODE  string `env:"DB_SSL_MODE" envDefault:"disable"`
 	TIMEZONE string `env:"DB_TIME_ZONE"  envDefault:"America/Bogota"`
 }
@@ -42,6 +42,6 @@ type APP struct {
 }
 
 func (c *config) DatabaseInit() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", c.DB.HOST, c.DB.USER, c.DB.PASSWORD, c.DB.DBNAME, c.DB.PORT)
-	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=UTC", c.DB.USER, c.DB.PASSWORD, c.DB.HOST, c.DB.DBNAME)
+	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
 }

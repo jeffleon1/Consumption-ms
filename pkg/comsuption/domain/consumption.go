@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	constants "github.com/jeffleon1/consumption-ms/internal/const"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -65,24 +66,36 @@ func StrToInt(meterID string) (int, error) {
 	return strconv.Atoi(meterID)
 }
 
+func TimeTostr(date time.Time, format string) string {
+	return date.Format(format)
+}
+
 func StrToDate(date string) (time.Time, error) {
-	dateFormat := "2006-01-02 15:04:05"
-	dateTimeStringWithoutTimeZone := strings.TrimSuffix(date, "+00")
-	if !hasHourAndMinutes(dateTimeStringWithoutTimeZone) {
-		dateTimeStringWithoutTimeZone += " 00:00:00"
+	dateFormat := constants.DateFormatDateTimeWithTZ
+	if !hasHourAndMinutes(date) {
+		date += " 00:00:00+00"
 	}
-	return time.Parse(dateFormat, dateTimeStringWithoutTimeZone)
+	dateFormated, err := time.Parse(dateFormat, date)
+	if err != nil {
+		logrus.Errorf("Error Parsing date %s", err.Error())
+		return time.Time{}, err
+	}
+	logrus.Info("Parsing Successfully do it ")
+	return dateFormated, nil
+
 }
 
 func hasHourAndMinutes(date string) bool {
-	_, err := time.Parse("15:03:00", date)
-	if err != nil {
+	arrayDate := strings.Split(date, " ")
+	if len(arrayDate) <= 1 {
 		return false
 	}
-	return true
+
+	count := strings.Count(arrayDate[1], ":")
+	return count == 2
 }
 
-type PostgresPowerConsumptionRepository interface {
+type MySQLPowerConsumptionRepository interface {
 	GetConsumptionByMeterIDAndWindowTime(startDate, endDate time.Time, meterID int) ([]UserConsumption, error)
 	CreatePowerConsumptionRecords(usersPowerConsumption []*UserConsumption) error
 	ModelMigration() error

@@ -40,10 +40,22 @@ func (s *PowerConsumptionHandlerImpl) GetConsumptionByMeterIDAndWindowTime(c *gi
 		return
 	}
 
-	s.powerConsumptionService.GetConsumptionByMeterIDAndWindowTime(meterIDs, startDate, endDate, kindPeriod)
+	data, err := s.powerConsumptionService.GetConsumptionByMeterIDAndWindowTime(meterIDs, startDate, endDate, kindPeriod)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Response{
+			Msg:    "Something goes wrong",
+			Status: "ERROR",
+			Data:   nil,
+			Err:    err.Error(),
+		})
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
+	c.JSON(http.StatusOK, Response{
+		Msg:    "information successfully brought",
+		Status: "SUCCESS",
+		Data:   data,
+		Err:    nil,
 	})
 }
 
