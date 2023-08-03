@@ -95,12 +95,14 @@ func hasHourAndMinutes(date string) bool {
 	return count == 2
 }
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . MySQLPowerConsumptionRepository
 type MySQLPowerConsumptionRepository interface {
 	GetConsumptionByMeterIDAndWindowTime(startDate, endDate time.Time, meterID int) ([]UserConsumption, error)
 	CreatePowerConsumptionRecords(usersPowerConsumption []*UserConsumption) error
 	ModelMigration() error
 }
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . CSVPowerConsumptionRepository
 type CSVPowerConsumptionRepository interface {
 	ConvertCSVToStruct(file *multipart.File) ([]*CSVUserConsumption, error)
 }

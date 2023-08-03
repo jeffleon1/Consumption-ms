@@ -15,6 +15,8 @@ import (
 type PowerConsumptionService interface {
 	GetConsumptionByMeterIDAndWindowTime(meterIDs string, kindPeriod string, startDate string, endDate string) ([]Serializer, error)
 	ImportCsvToDatabase(file *multipart.File) error
+	chekingKindPeriod(kindPeriod string) (string, error)
+	checkingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error)
 }
 
 type PowerConsumptionServiceImpl struct {

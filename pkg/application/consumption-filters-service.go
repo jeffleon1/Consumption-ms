@@ -117,6 +117,9 @@ func (f *Filter) daysInMonth(month, year int) int {
 
 func (f *Filter) DivideInformationByYears() map[int]map[int][]domain.UserConsumption {
 	data := f.Data
+	if len(data) == 0 {
+		return make(map[int]map[int][]domain.UserConsumption)
+	}
 	objectYearInformation := make(map[int]map[int][]domain.UserConsumption)
 	objectMonthInformation := make(map[int][]domain.UserConsumption)
 	sort.Slice(data, func(i, j int) bool {
@@ -179,6 +182,9 @@ func (f *Filter) ReduceInformation(weeklyGroupConsumptions []*ConsumptionEnergy)
 func (m *MonthlyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	daysInMonth := m.daysInMonth(month, year)
 	var monthGroups []TimeGroupDivision
+	if month < 1 || month > 12 {
+		return []TimeGroupDivision{}
+	}
 	initialDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	lastDate := time.Date(year, time.Month(month), daysInMonth, 23, 59, 59, 59, time.UTC)
 	monthGroups = append(monthGroups, TimeGroupDivision{
@@ -189,7 +195,9 @@ func (m *MonthlyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 }
 
 func (m *MonthlyFilter) GroupsSerializedToString(startDate time.Time, endDate time.Time) string {
-	fmt.Println(startDate, endDate)
+	if startDate.After(endDate) {
+		return ""
+	}
 	return domain.TimeTostr(startDate, constants.DateFormatMonthlyPeriod)
 }
 
@@ -197,7 +205,10 @@ func (m *MonthlyFilter) GroupsSerializedToString(startDate time.Time, endDate ti
 func (d *DailyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	daysInMonth := d.daysInMonth(month, year)
 	var dayGroups []TimeGroupDivision
-	for i := 1; i <= daysInMonth; i += 1 {
+	if month < 1 || month > 12 {
+		return []TimeGroupDivision{}
+	}
+	for i := 1; i <= daysInMonth; i++ {
 		initialDay := i
 		initialDate := time.Date(year, time.Month(month), initialDay, 0, 0, 0, 0, time.UTC)
 		lastDate := initialDate.AddDate(0, 0, 1).Add(-time.Second)
@@ -211,6 +222,9 @@ func (d *DailyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 }
 
 func (d *DailyFilter) GroupsSerializedToString(startDate time.Time, endDate time.Time) string {
+	if startDate.After(endDate) {
+		return ""
+	}
 	return domain.TimeTostr(startDate, constants.DateFormatWeeklyAndDailyPeriod)
 }
 
@@ -218,12 +232,15 @@ func (d *DailyFilter) GroupsSerializedToString(startDate time.Time, endDate time
 func (w *WeeklyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	daysInMonth := w.daysInMonth(month, year)
 	var weekGroups []TimeGroupDivision
+	if month < 1 || month > 12 {
+		return []TimeGroupDivision{}
+	}
 	for i := 1; i <= daysInMonth; i += 7 {
 		initialDay := i
 		initialDate := time.Date(year, time.Month(month), initialDay, 0, 0, 0, 0, time.UTC)
 		lastDate := initialDate.AddDate(0, 0, 7).Add(-time.Second)
 		if initialDay+6 > daysInMonth {
-			lastDate = time.Date(year, time.Month(month), daysInMonth, 0, 0, 0, 0, time.UTC)
+			lastDate = time.Date(year, time.Month(month), daysInMonth, 23, 59, 59, 59, time.UTC)
 		}
 		weekGroups = append(weekGroups, TimeGroupDivision{
 			InitDate:   initialDate,
@@ -233,7 +250,10 @@ func (w *WeeklyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	return weekGroups
 }
 
-func (m *WeeklyFilter) GroupsSerializedToString(startDate time.Time, endDate time.Time) string {
+func (w *WeeklyFilter) GroupsSerializedToString(startDate time.Time, endDate time.Time) string {
+	if startDate.After(endDate) {
+		return ""
+	}
 	startDateString := domain.TimeTostr(startDate, constants.DateFormatWeeklyAndDailyPeriod)
 	endDateString := domain.TimeTostr(endDate, constants.DateFormatWeeklyAndDailyPeriod)
 	return fmt.Sprintf("%s - %s", startDateString, endDateString)

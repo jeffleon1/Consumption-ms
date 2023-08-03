@@ -7,7 +7,7 @@ import (
 	config "github.com/jeffleon1/consumption-ms/internal/configuration"
 	"github.com/jeffleon1/consumption-ms/pkg/application"
 	"github.com/jeffleon1/consumption-ms/pkg/infraestructure"
-	"github.com/jeffleon1/consumption-ms/pkg/infraestructure/repositories"
+	repositories "github.com/jeffleon1/consumption-ms/pkg/repository"
 	"github.com/sirupsen/logrus"
 )
 
