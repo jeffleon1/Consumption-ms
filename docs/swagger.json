@@ -1,0 +1,134 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "It's and API that provides information regarding the energy consumption with three diferent filters or rates of time weekly. monthly and daily in a given window time.",
+        "title": "Consumption API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/consumption": {
+            "get": {
+                "description": "Get the user consumption information in a window time divided monthly, weekly or daily",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Consumption"
+                ],
+                "summary": "Get the user consumption information in a window time divided monthly, weekly or daily",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "start date",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end date",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "kind period",
+                        "name": "kind_period",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "meter ids",
+                        "name": "meter_ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/infraestructure.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/infraestructure.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/consumption/information": {
+            "post": {
+                "description": "Import a csv file to insert the information in the user_consumption database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Consumption"
+                ],
+                "summary": "Import a csv file to insert the information in the user_consumption database",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "this is a csv test file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/infraestructure.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/infraestructure.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "infraestructure.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {},
+                "msg": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
