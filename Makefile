@@ -7,6 +7,10 @@ run:
 	@echo "Running $(APP_NAME)..."
 	@go run $(SRC_DIR)/main.go
 
+run-air:
+	@echo "Running $(APP_NAME) in Docker..."
+	@air
+
 run-docker:
 	@echo "Running $(APP_NAME) in Docker..."
 	@docker compose up -d --build
@@ -17,4 +21,4 @@ down-docker:
 
 make-docs:
 	@echo "Making docs $(APP_NAME)..."
-	@docker swag init -g ./cmd/api/main.go
+	@swag init -g ./cmd/api/main.go
