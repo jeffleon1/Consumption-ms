@@ -24,3 +24,7 @@ Once the project is up I suggest you go to the documentation built in swagger an
 interface.
 
 `http://localhost:8080/api/v1/docs/index.html`
+
+###Example:
+ Example to do the request
+ `localhost:8080/api/v1/consumption?meter_ids=1,2&start_date=2023-05-30&end_date=2023-06-20&kind_period=weekly`
