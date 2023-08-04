@@ -1,6 +1,9 @@
 # Consumption-ms
 It's and API that provides information regarding the energy consuption with three diferent filters or rates of time weekly. monthly and daily in a given window time.
 
+# Prerequisites
+Please create the `.env` file take in account that you can find an example in the root path `.env-sample`
+
 # Run
 You can find a file called Makefile to run it you will need to have "make" insatalled on your computer.
 
