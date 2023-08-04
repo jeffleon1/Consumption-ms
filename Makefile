@@ -14,3 +14,7 @@ run-docker:
 down-docker:
 	@echo "Stopping $(APP_NAME)..."
 	@docker compose down
+
+make-docs:
+	@echo "Making docs $(APP_NAME)..."
+	@docker swag init -g ./cmd/api/main.go
