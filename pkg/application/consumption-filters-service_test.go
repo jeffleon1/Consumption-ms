@@ -302,25 +302,13 @@ var _ = Describe("ReduceInformation Tests", func() {
 		})
 
 		It("should handle empty weeklyGroupConsumptions without errors", func() {
-			// Configura datos de prueba con weeklyGroupConsumptions vacío
 			weeklyGroupConsumptions := []*ConsumptionEnergy{}
-
-			// Ejecuta la función ReduceInformation
 			filter.ReduceInformation(weeklyGroupConsumptions)
-
-			// Verifica que no haya errores
-			// No hay expectativas específicas para verificar los resultados, ya que no se espera que se realice ninguna acción con el slice vacío
 		})
 
 		It("should handle nil weeklyGroupConsumptions without errors", func() {
-			// Configura datos de prueba con weeklyGroupConsumptions nulo (nil)
 			weeklyGroupConsumptions := []*ConsumptionEnergy(nil)
-
-			// Ejecuta la función ReduceInformation
 			filter.ReduceInformation(weeklyGroupConsumptions)
-
-			// Verifica que no haya errores
-			// No hay expectativas específicas para verificar los resultados, ya que no se espera que se realice ninguna acción con el slice nulo
 		})
 	})
 })
@@ -331,23 +319,16 @@ var _ = Describe("Monthly Group division", func() {
 	)
 
 	BeforeEach(func() {
-		// Configura el MonthlyFilter necesario para las pruebas
 		monthlyFilter = &MonthlyFilter{}
 	})
 
 	Context("GroupDivision", func() {
 		It("should correctly group a 30-day month", func() {
-			// Configura datos de prueba para un mes de 30 días
-			month := 4 // Abril
+			month := 4
 			year := 2023
-
-			// Ejecuta la función GroupDivision
 			result := monthlyFilter.GroupDivision(month, year)
 
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(1)) // Debería haber una división de tiempo para todo el mes
-
-			// Verifica las fechas de inicio y final
+			Expect(result).To(HaveLen(1))
 			initDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 			finishDate := time.Date(year, time.Month(month), 30, 23, 59, 59, 59, time.UTC)
 			Expect(result[0].InitDate).To(Equal(initDate))
@@ -355,17 +336,12 @@ var _ = Describe("Monthly Group division", func() {
 		})
 
 		It("should correctly group a 31-day month", func() {
-			// Configura datos de prueba para un mes de 31 días
-			month := 5 // Mayo
+			month := 5
 			year := 2023
 
-			// Ejecuta la función GroupDivision
 			result := monthlyFilter.GroupDivision(month, year)
+			Expect(result).To(HaveLen(1))
 
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(1)) // Debería haber una división de tiempo para todo el mes
-
-			// Verifica las fechas de inicio y final
 			initDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 			finishDate := time.Date(year, time.Month(month), 31, 23, 59, 59, 59, time.UTC)
 			Expect(result[0].InitDate).To(Equal(initDate))
@@ -373,17 +349,11 @@ var _ = Describe("Monthly Group division", func() {
 		})
 
 		It("should correctly group a February of a leap year", func() {
-			// Configura datos de prueba para un febrero de un año bisiesto (29 días)
-			month := 2   // Febrero
-			year := 2024 // Año bisiesto
+			month := 2
+			year := 2024
 
-			// Ejecuta la función GroupDivision
 			result := monthlyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(1)) // Debería haber una división de tiempo para todo el mes
-
-			// Verifica las fechas de inicio y final
+			Expect(result).To(HaveLen(1))
 			initDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 			finishDate := time.Date(year, time.Month(month), 29, 23, 59, 59, 59, time.UTC)
 			Expect(result[0].InitDate).To(Equal(initDate))
@@ -391,66 +361,45 @@ var _ = Describe("Monthly Group division", func() {
 		})
 
 		It("should correctly handle an invalid month", func() {
-			// Configura datos de prueba para un mes inválido (fuera del rango 1-12)
-			month := 13 // Mes inválido
+			month := 13
 			year := 2023
 
-			// Ejecuta la función GroupDivision
 			result := monthlyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea un slice vacío
 			Expect(result).To(BeEmpty())
 		})
 
 		Context("GroupsSerializedToString", func() {
 			It("should serialize dates correctly", func() {
-				// Configura datos de prueba
 				startDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 				endDate := time.Date(2023, 1, 31, 23, 59, 59, 59, time.UTC)
-
-				// Ejecuta la función GroupsSerializedToString
 				result := monthlyFilter.GroupsSerializedToString(startDate, endDate)
-
-				// Verifica que el resultado sea el esperado
-				expectedResult := "Jan 2023" // El formato esperado para enero de 2023 es "yyyy-MM"
+				expectedResult := "Jan 2023"
 				Expect(result).To(Equal(expectedResult))
 			})
 
 			It("should handle different years correctly", func() {
-				// Configura datos de prueba para febrero de un año bisiesto (29 días)
 				startDate := time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)
 				endDate := time.Date(2024, 2, 29, 23, 59, 59, 59, time.UTC)
-
-				// Ejecuta la función GroupsSerializedToString
 				result := monthlyFilter.GroupsSerializedToString(startDate, endDate)
 
-				// Verifica que el resultado sea el esperado
-				expectedResult := "Feb 2024" // El formato esperado para febrero de 2024 es "yyyy-MM"
+				expectedResult := "Feb 2024"
 				Expect(result).To(Equal(expectedResult))
 			})
 
 			It("should handle endDate in a different year correctly", func() {
-				// Configura datos de prueba para diciembre de un año y enero del siguiente año
 				startDate := time.Date(2022, 12, 1, 0, 0, 0, 0, time.UTC)
 				endDate := time.Date(2023, 1, 31, 23, 59, 59, 59, time.UTC)
-
-				// Ejecuta la función GroupsSerializedToString
 				result := monthlyFilter.GroupsSerializedToString(startDate, endDate)
 
-				// Verifica que el resultado sea el esperado
-				expectedResult := "Dec 2022" // El formato esperado para diciembre de 2022 es "yyyy-MM"
+				expectedResult := "Dec 2022"
 				Expect(result).To(Equal(expectedResult))
 			})
 
 			It("should handle an invalid date range correctly", func() {
-				// Configura datos de prueba con una fecha de inicio posterior a la fecha de finalización
 				startDate := time.Date(2023, 1, 31, 0, 0, 0, 0, time.UTC)
 				endDate := time.Date(2023, 1, 1, 23, 59, 59, 59, time.UTC)
 
-				// Ejecuta la función GroupsSerializedToString
 				result := monthlyFilter.GroupsSerializedToString(startDate, endDate)
-
-				// Verifica que el resultado sea vacío o algún otro valor indicativo de error
 				Expect(result).To(BeEmpty())
 			})
 		})
@@ -463,23 +412,16 @@ var _ = Describe("Daily filter", func() {
 	)
 
 	BeforeEach(func() {
-		// Configura el DailyFilter necesario para las pruebas
 		dailyFilter = &DailyFilter{}
 	})
 
 	Context("GroupDivision", func() {
 		It(shouldThirtyDays, func() {
-			// Configura datos de prueba para un mes de 30 días
-			month := 4 // Abril
+			month := 4
 			year := 2023
 
-			// Ejecuta la función GroupDivision
 			result := dailyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(30)) // Debería haber 30 divisiones de tiempo para cada día del mes
-
-			// Verifica las fechas de inicio y final de cada día
+			Expect(result).To(HaveLen(30))
 			initDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 			for i, group := range result {
 				Expect(group.InitDate).To(Equal(initDate.AddDate(0, 0, i)))
@@ -488,17 +430,11 @@ var _ = Describe("Daily filter", func() {
 		})
 
 		It(shouldThirtyOneDays, func() {
-			// Configura datos de prueba para un mes de 31 días
-			month := 5 // Mayo
+			month := 5
 			year := 2023
 
-			// Ejecuta la función GroupDivision
 			result := dailyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(31)) // Debería haber 31 divisiones de tiempo para cada día del mes
-
-			// Verifica las fechas de inicio y final de cada día
+			Expect(result).To(HaveLen(31))
 			initDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 			for i, group := range result {
 				Expect(group.InitDate).To(Equal(initDate.AddDate(0, 0, i)))
@@ -507,17 +443,11 @@ var _ = Describe("Daily filter", func() {
 		})
 
 		It("should handle February of a leap year correctly", func() {
-			// Configura datos de prueba para febrero de un año bisiesto (29 días)
-			month := 2   // Febrero
-			year := 2024 // Año bisiesto
+			month := 2
+			year := 2024
 
-			// Ejecuta la función GroupDivision
 			result := dailyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(29)) // Debería haber 29 divisiones de tiempo para cada día del mes
-
-			// Verifica las fechas de inicio y final de cada día
+			Expect(result).To(HaveLen(29))
 			initDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 			for i, group := range result {
 				Expect(group.InitDate).To(Equal(initDate.AddDate(0, 0, i)))
@@ -526,41 +456,27 @@ var _ = Describe("Daily filter", func() {
 		})
 
 		It("should handle an invalid month correctly", func() {
-			// Configura datos de prueba para un mes inválido (fuera del rango 1-12)
-			month := 13 // Mes inválido
+			month := 13
 			year := 2023
-
-			// Ejecuta la función GroupDivision
 			result := dailyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea un slice vacío
 			Expect(result).To(BeEmpty())
 		})
 	})
 
 	Context("GroupsSerializedToString", func() {
 		It(shouldSerializeDaysCorrectly, func() {
-			// Configura datos de prueba
 			startDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 			endDate := time.Date(2023, 1, 31, 23, 59, 59, 59, time.UTC)
-
-			// Ejecuta la función GroupsSerializedToString
 			result := dailyFilter.GroupsSerializedToString(startDate, endDate)
-
-			// Verifica que el resultado sea el esperado
-			expectedResult := "Jan 1" // El formato esperado para el rango de fechas es "yyyy-MM-dd_yyyy-MM-dd"
+			expectedResult := "Jan 1"
 			Expect(result).To(Equal(expectedResult))
 		})
 
 		It("should handle endDate before startDate correctly", func() {
-			// Configura datos de prueba con endDate antes que startDate
 			startDate := time.Date(2023, 1, 31, 0, 0, 0, 0, time.UTC)
 			endDate := time.Date(2023, 1, 1, 23, 59, 59, 59, time.UTC)
-
-			// Ejecuta la función GroupsSerializedToString
 			result := dailyFilter.GroupsSerializedToString(startDate, endDate)
 
-			// Verifica que el resultado sea vacío
 			Expect(result).To(BeEmpty())
 		})
 	})
@@ -572,86 +488,52 @@ var _ = Describe("Weekly filter", func() {
 	)
 
 	BeforeEach(func() {
-		// Configura el WeeklyFilter necesario para las pruebas
 		weeklyFilter = &WeeklyFilter{}
 	})
 
 	Context("GroupDivision", func() {
 		It(shouldThirtyDays, func() {
-			// Configura datos de prueba para un mes de 30 días
-			month := 4 // Abril
+			month := 4
 			year := 2023
-
-			// Ejecuta la función GroupDivision
 			result := weeklyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(5)) // Debería haber 5 divisiones de tiempo para cada semana del mes
-
-			// Verifica las fechas de inicio y final de cada semana
+			Expect(result).To(HaveLen(5))
 		})
 
 		It(shouldThirtyOneDays, func() {
-			// Configura datos de prueba para un mes de 31 días
-			month := 5 // Mayo
+			month := 5
 			year := 2023
 
-			// Ejecuta la función GroupDivision
 			result := weeklyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(5)) // Debería haber 6 divisiones de tiempo para cada semana del mes
-
+			Expect(result).To(HaveLen(5))
 		})
 
 		It("should handle February of a leap year correctly", func() {
-			// Configura datos de prueba para febrero de un año bisiesto (29 días)
-			month := 2   // Febrero
-			year := 2024 // Año bisiesto
-
-			// Ejecuta la función GroupDivision
+			month := 2
+			year := 2024
 			result := weeklyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea el esperado
-			Expect(result).To(HaveLen(5)) // Debería haber 4 divisiones de tiempo para cada semana del mes
-
+			Expect(result).To(HaveLen(5))
 		})
 
 		It("should handle an invalid month correctly", func() {
-			// Configura datos de prueba para un mes inválido (fuera del rango 1-12)
-			month := 13 // Mes inválido
+			month := 13
 			year := 2023
-
-			// Ejecuta la función GroupDivision
 			result := weeklyFilter.GroupDivision(month, year)
-
-			// Verifica que el resultado sea un slice vacío
 			Expect(result).To(BeEmpty())
 		})
 
 		Context("GroupsSerializedToString", func() {
 			It(shouldSerializeDaysCorrectly, func() {
-				// Configura datos de prueba
 				startDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 				endDate := time.Date(2023, 1, 7, 23, 59, 59, 59, time.UTC)
-
-				// Ejecuta la función GroupsSerializedToString
 				result := weeklyFilter.GroupsSerializedToString(startDate, endDate)
-
-				// Verifica que el resultado sea el esperado
-				expectedResult := "Jan 1 - Jan 7" // El formato esperado para el rango de fechas es "yyyy-MM-dd - yyyy-MM-dd"
+				expectedResult := "Jan 1 - Jan 7"
 				Expect(result).To(Equal(expectedResult))
 			})
 
 			It("should handle endDate before startDate correctly", func() {
-				// Configura datos de prueba con endDate antes que startDate
 				startDate := time.Date(2023, 1, 7, 0, 0, 0, 0, time.UTC)
 				endDate := time.Date(2023, 1, 1, 23, 59, 59, 59, time.UTC)
-
-				// Ejecuta la función GroupsSerializedToString
 				result := weeklyFilter.GroupsSerializedToString(startDate, endDate)
-
-				// Verifica que el resultado sea vacío
 				Expect(result).To(BeEmpty())
 			})
 		})

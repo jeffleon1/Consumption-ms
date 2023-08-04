@@ -12,11 +12,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . PowerConsumptionService
 type PowerConsumptionService interface {
 	GetConsumptionByMeterIDAndWindowTime(meterIDs string, kindPeriod string, startDate string, endDate string) ([]Serializer, error)
 	ImportCsvToDatabase(file *multipart.File) error
-	chekingKindPeriod(kindPeriod string) (string, error)
-	checkingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error)
+	ChekingKindPeriod(kindPeriod string) (string, error)
+	CheckingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error)
 }
 
 type PowerConsumptionServiceImpl struct {
@@ -33,7 +34,7 @@ func NewPowerConsumptionService(mysqlRepository domain.MySQLPowerConsumptionRepo
 
 func (s *PowerConsumptionServiceImpl) GetConsumptionByMeterIDAndWindowTime(meterIDs, startDate, endDate, kindPeriod string) ([]Serializer, error) {
 
-	chekedQueryParams, err := s.checkingQueryParamConstrains(meterIDs, kindPeriod, startDate, endDate)
+	chekedQueryParams, err := s.CheckingQueryParamConstrains(meterIDs, kindPeriod, startDate, endDate)
 	userConsumptionChannel := make(chan Serializer, len(chekedQueryParams.MeterIDs))
 	errorUserConsumptionChannel := make(chan error, len(chekedQueryParams.MeterIDs))
 	wg := sync.WaitGroup{}
@@ -78,7 +79,7 @@ func (s *PowerConsumptionServiceImpl) GetConsumptionByMeterIDAndWindowTime(meter
 	return allUserConsumptions, nil
 }
 
-func (s *PowerConsumptionServiceImpl) checkingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error) {
+func (s *PowerConsumptionServiceImpl) CheckingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error) {
 	var numberArrayMeterIDs []int
 	timeStartDate, err := domain.StrToDate(startDate)
 	if err != nil {
@@ -107,7 +108,7 @@ func (s *PowerConsumptionServiceImpl) checkingQueryParamConstrains(meterIDs stri
 		numberArrayMeterIDs = append(numberArrayMeterIDs, numberMeterID)
 	}
 
-	checkedKindPeriod, err := s.chekingKindPeriod(kindPeriod)
+	checkedKindPeriod, err := s.ChekingKindPeriod(kindPeriod)
 	if err != nil {
 		logrus.Errorf("Error: cheking kind period %s", err.Error())
 		return nil, err
@@ -121,7 +122,7 @@ func (s *PowerConsumptionServiceImpl) checkingQueryParamConstrains(meterIDs stri
 	}, nil
 }
 
-func (s *PowerConsumptionServiceImpl) chekingKindPeriod(kindPeriod string) (string, error) {
+func (s *PowerConsumptionServiceImpl) ChekingKindPeriod(kindPeriod string) (string, error) {
 	lowerCaseKindPeriod := strings.ToLower(kindPeriod)
 	trimAndLowerCaseKindPeriod := strings.Trim(lowerCaseKindPeriod, " ")
 	switch trimAndLowerCaseKindPeriod {
