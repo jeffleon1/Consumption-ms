@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -75,6 +76,9 @@ func StrToDate(date string) (time.Time, error) {
 	if !hasHourAndMinutes(date) {
 		date += " 00:00:00+00"
 	}
+	if !isValidDateTime(date) {
+		return time.Time{}, fmt.Errorf("Invalid date time %s", date)
+	}
 	dateFormated, err := time.Parse(dateFormat, date)
 	if err != nil {
 		logrus.Errorf("Error Parsing date %s", err.Error())
@@ -83,6 +87,13 @@ func StrToDate(date string) (time.Time, error) {
 	logrus.Info("Parsing Successfully do it ")
 	return dateFormated, nil
 
+}
+
+func isValidDateTime(dateTimeStr string) bool {
+	_, err1 := time.Parse("2006-01-02", dateTimeStr)
+	_, err2 := time.Parse("2006-01-02 15:04:05+00", dateTimeStr)
+
+	return err1 == nil || err2 == nil
 }
 
 func hasHourAndMinutes(date string) bool {

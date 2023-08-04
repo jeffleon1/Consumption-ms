@@ -32,9 +32,59 @@ func NewPowerConsumptionService(mysqlRepository domain.MySQLPowerConsumptionRepo
 	}
 }
 
+func (s *PowerConsumptionServiceImpl) CheckingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error) {
+	var numberArrayMeterIDs []int
+	timeStartDate, err := domain.StrToDate(startDate)
+	if err != nil {
+		logrus.Errorf("Error: converting string to date startDate %s", err.Error())
+		return nil, err
+	}
+	timeEndDate, err := domain.StrToDate(endDate)
+	if err != nil {
+		logrus.Errorf("Error: converting string to date endDate %s", err.Error())
+		return nil, err
+	}
+	if timeStartDate.After(timeEndDate) {
+		logrus.Errorf("Error: Invalid dates, start date must be before end date %s %s", startDate, endDate)
+		return nil, fmt.Errorf("Error: Invalid dates, start date must be before end date %s %s", startDate, endDate)
+	}
+	timeEndDateMidnight := timeEndDate.AddDate(0, 0, 1).Add(-time.Second)
+
+	arraymeterIDs := strings.Split(meterIDs, ",")
+	if len(arraymeterIDs) == 0 {
+		logrus.Errorf("Error: the array is empty %s", err.Error())
+		return nil, err
+	}
+
+	for _, meterID := range arraymeterIDs {
+		numberMeterID, err := domain.StrToInt(meterID)
+		if err != nil {
+			logrus.Errorf("Error: converting str to int meterID %s", err.Error())
+			return nil, err
+		}
+		numberArrayMeterIDs = append(numberArrayMeterIDs, numberMeterID)
+	}
+
+	checkedKindPeriod, err := s.ChekingKindPeriod(kindPeriod)
+	if err != nil {
+		logrus.Errorf("Error: cheking kind period %s", err.Error())
+		return nil, err
+	}
+	logrus.Info("the information was succefully checked all queryparms are available")
+	return &domain.UserConsumptionQueryParams{
+		StartDate:  timeStartDate,
+		EndDate:    timeEndDateMidnight,
+		MeterIDs:   numberArrayMeterIDs,
+		KindPeriod: checkedKindPeriod,
+	}, nil
+}
+
 func (s *PowerConsumptionServiceImpl) GetConsumptionByMeterIDAndWindowTime(meterIDs, startDate, endDate, kindPeriod string) ([]Serializer, error) {
 
 	chekedQueryParams, err := s.CheckingQueryParamConstrains(meterIDs, kindPeriod, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
 	userConsumptionChannel := make(chan Serializer, len(chekedQueryParams.MeterIDs))
 	errorUserConsumptionChannel := make(chan error, len(chekedQueryParams.MeterIDs))
 	wg := sync.WaitGroup{}
@@ -77,49 +127,6 @@ func (s *PowerConsumptionServiceImpl) GetConsumptionByMeterIDAndWindowTime(meter
 	}
 
 	return allUserConsumptions, nil
-}
-
-func (s *PowerConsumptionServiceImpl) CheckingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error) {
-	var numberArrayMeterIDs []int
-	timeStartDate, err := domain.StrToDate(startDate)
-	if err != nil {
-		logrus.Errorf("Error: converting string to date startDate %s", err.Error())
-		return nil, err
-	}
-	timeEndDate, err := domain.StrToDate(endDate)
-	if err != nil {
-		logrus.Errorf("Error: converting string to date endDate %s", err.Error())
-		return nil, err
-	}
-	timeEndDateMidnight := timeEndDate.AddDate(0, 0, 1).Add(-time.Second)
-
-	arraymeterIDs := strings.Split(meterIDs, ",")
-	if len(arraymeterIDs) == 0 {
-		logrus.Errorf("Error: the array is empty %s", err.Error())
-		return nil, err
-	}
-
-	for _, meterID := range arraymeterIDs {
-		numberMeterID, err := domain.StrToInt(meterID)
-		if err != nil {
-			logrus.Errorf("Error: converting str to int meterID %s", err.Error())
-			return nil, err
-		}
-		numberArrayMeterIDs = append(numberArrayMeterIDs, numberMeterID)
-	}
-
-	checkedKindPeriod, err := s.ChekingKindPeriod(kindPeriod)
-	if err != nil {
-		logrus.Errorf("Error: cheking kind period %s", err.Error())
-		return nil, err
-	}
-	logrus.Info("the information was succefully checked all queryparms are available")
-	return &domain.UserConsumptionQueryParams{
-		StartDate:  timeStartDate,
-		EndDate:    timeEndDateMidnight,
-		MeterIDs:   numberArrayMeterIDs,
-		KindPeriod: checkedKindPeriod,
-	}, nil
 }
 
 func (s *PowerConsumptionServiceImpl) ChekingKindPeriod(kindPeriod string) (string, error) {

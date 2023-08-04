@@ -44,7 +44,7 @@ func (s *PowerConsumptionHandlerImpl) GetConsumptionByMeterIDAndWindowTime(c *gi
 	endDate := c.Query("end_date")
 	kindPeriod := c.Query("kind_period")
 	if meterIDs == "" || startDate == "" || endDate == "" || kindPeriod == "" {
-		c.JSON(http.StatusBadRequest, Response{
+		c.AbortWithStatusJSON(http.StatusBadRequest, Response{
 			Msg:    "Something goes wrong with your query params",
 			Status: "ERROR",
 			Data:   nil,
@@ -57,7 +57,8 @@ func (s *PowerConsumptionHandlerImpl) GetConsumptionByMeterIDAndWindowTime(c *gi
 
 	data, err := s.powerConsumptionService.GetConsumptionByMeterIDAndWindowTime(meterIDs, startDate, endDate, kindPeriod)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Response{
+		fmt.Println("Entro aca con todos los poderes")
+		c.AbortWithStatusJSON(http.StatusBadRequest, Response{
 			Msg:    "Something goes wrong",
 			Status: "ERROR",
 			Data:   nil,
@@ -89,7 +90,7 @@ func (s *PowerConsumptionHandlerImpl) GetConsumptionByMeterIDAndWindowTime(c *gi
 func (s *PowerConsumptionHandlerImpl) ImportCsvToDatabase(c *gin.Context) {
 	csvPartFile, _, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Response{
+		c.AbortWithStatusJSON(http.StatusBadRequest, Response{
 			Msg:    "Something goes wrong please check your csv file",
 			Status: "ERROR",
 			Data:   nil,
@@ -99,7 +100,7 @@ func (s *PowerConsumptionHandlerImpl) ImportCsvToDatabase(c *gin.Context) {
 	}
 	err = s.powerConsumptionService.ImportCsvToDatabase(&csvPartFile)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Response{
+		c.AbortWithStatusJSON(http.StatusBadRequest, Response{
 			Msg:    "Something goes wrong please check your csv file",
 			Status: "ERROR",
 			Data:   nil,
