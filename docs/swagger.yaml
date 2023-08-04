@@ -1,0 +1,97 @@
+basePath: /api/v1
+definitions:
+  infraestructure.Response:
+    properties:
+      data: {}
+      error: {}
+      msg:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: It's and API that provides information regarding the energy consumption
+    with three diferent filters or rates of time weekly. monthly and daily in a given
+    window time.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Consumption API
+  version: "1.0"
+paths:
+  /consumption:
+    get:
+      consumes:
+      - application/json
+      description: Get the user consumption information in a window time divided monthly,
+        weekly or daily
+      parameters:
+      - description: start date
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: end date
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - description: kind period
+        in: query
+        name: kind_period
+        required: true
+        type: string
+      - description: meter ids
+        in: query
+        name: meter_ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/infraestructure.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/infraestructure.Response'
+      summary: Get the user consumption information in a window time divided monthly,
+        weekly or daily
+      tags:
+      - Consumption
+  /consumption/information:
+    post:
+      consumes:
+      - application/json
+      description: Import a csv file to insert the information in the user_consumption
+        database
+      parameters:
+      - description: this is a csv test file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/infraestructure.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/infraestructure.Response'
+      summary: Import a csv file to insert the information in the user_consumption
+        database
+      tags:
+      - Consumption
+swagger: "2.0"
