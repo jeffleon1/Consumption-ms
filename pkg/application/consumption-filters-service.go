@@ -69,6 +69,16 @@ type WeeklyFilter struct {
 	Filter
 }
 
+// NewFilter: Factory to create filterss
+//
+// Parámeters:
+// tipe - type of filter
+// startDate - start date to retrieve or filter the information
+// endDate - type of filter
+// tipe - type of filter
+//
+// Returns:
+// The struct that repesents the database domain
 func NewFilter(tipe string, startDate, endDate time.Time, data []domain.UserConsumption) FilterOperations {
 	switch tipe {
 	case constants.PeriodKindMonthly:
@@ -82,6 +92,14 @@ func NewFilter(tipe string, startDate, endDate time.Time, data []domain.UserCons
 	}
 }
 
+// GetConsumptionData: this function is the main function in this file becuase have all the logic to retrieve
+// the records then organize that records and return the information in the way that we want
+//
+// Parámeters:
+// filter - is an interface that allow do the process with all types of filters no matter what kind of filter is
+//
+// Returns:
+// The Serializer that is a kind of structure that has all the attributes that we need to serialize in consumption serializer
 func GetConsumptionData(filter FilterOperations) Serializer {
 	consumptionByYear := filter.DivideInformationByYears()
 	var consumptionEnergy []*ConsumptionEnergy
@@ -108,13 +126,25 @@ func GetConsumptionData(filter FilterOperations) Serializer {
 	return objectSerializer
 }
 
-// Common Filter Operations
+// daysInMonth: get and month and year and return the number of days for this especific month in this specific year
+//
+// Parámeters:
+// month - month to retrieve the days
+// year - especify the year and month to retrieve the days
+//
+// Returns:
+// return the days in this especific month in this especific year
 func (f *Filter) daysInMonth(month, year int) int {
 	firstDayOfNextMonth := time.Date(year, time.Month(month)+1, 1, 0, 0, 0, 0, time.UTC)
 	lastDayOfMonth := firstDayOfNextMonth.Add(-time.Second)
 	return lastDayOfMonth.Day()
 }
 
+// DivideInformationByYears: divide the information retrieve in the database and divided
+// in a map by year --> month ---> records in month
+//
+// Returns:
+// return a map with all the information by year --> month ---> records in month
 func (f *Filter) DivideInformationByYears() map[int]map[int][]domain.UserConsumption {
 	data := f.Data
 	if len(data) == 0 {
@@ -144,6 +174,15 @@ func (f *Filter) DivideInformationByYears() map[int]map[int][]domain.UserConsump
 	return objectYearInformation
 }
 
+// MatchConsumptionInTimeGroup: do the match between the userconsumption and
+// the group division no matter if it's a group division by monthly, weekly or daily
+//
+// Parameters:
+// consumptions: has the consumption information
+// timeGroups: has the time groups by monthly weekly of daily depends of the type of filter
+//
+// Returns:
+// return the information matched between timegroups and userconsumption
 func (f *Filter) MatchConsumptionInTimeGroup(consumptions []domain.UserConsumption, timeGroups []TimeGroupDivision) []*ConsumptionEnergy {
 	var serializer []*ConsumptionEnergy
 	for _, timeGroup := range timeGroups {
@@ -166,19 +205,34 @@ func (f *Filter) MatchConsumptionInTimeGroup(consumptions []domain.UserConsumpti
 	return serializer
 }
 
-func (f *Filter) ReduceInformation(weeklyGroupConsumptions []*ConsumptionEnergy) {
-	for _, weeklyGroupConsumption := range weeklyGroupConsumptions {
-		for _, weeklyGroup := range weeklyGroupConsumption.Data {
-			weeklyGroupConsumption.ActiveEnergy += weeklyGroup.ActiveEnergy
-			weeklyGroupConsumption.ReactiveEnergy += weeklyGroup.ReactiveEnergy
-			weeklyGroupConsumption.CapacitiveReactive += weeklyGroup.CapacitiveReactive
-			weeklyGroupConsumption.Exported += weeklyGroup.Solar
+// ReduceInformation: reduce the information a only one record by group division
+//
+// Parameters:
+// groupConsumptions: has the information matched between groups and information
+//
+// Returns:
+// return reduced and one record by group division
+func (f *Filter) ReduceInformation(groupConsumptions []*ConsumptionEnergy) {
+	for _, groupConsumption := range groupConsumptions {
+		for _, group := range groupConsumption.Data {
+			groupConsumption.ActiveEnergy += group.ActiveEnergy
+			groupConsumption.ReactiveEnergy += group.ReactiveEnergy
+			groupConsumption.CapacitiveReactive += group.CapacitiveReactive
+			groupConsumption.Exported += group.Solar
 		}
 	}
 	logrus.Info("Reduce information is done")
 }
 
 // Monthly filter
+// GroupDivision: do the group division for a monthly filter
+//
+// Parameters:
+// month
+// year
+//
+// Returns:
+// return the time group division for a monthly filter
 func (m *MonthlyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	daysInMonth := m.daysInMonth(month, year)
 	var monthGroups []TimeGroupDivision
@@ -202,6 +256,14 @@ func (m *MonthlyFilter) GroupsSerializedToString(startDate time.Time, endDate ti
 }
 
 // Dayly filter
+// GroupDivision: do the group division for a daily filter
+//
+// Parameters:
+// month
+// year
+//
+// Returns:
+// return the time group division for a daily filter
 func (d *DailyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	daysInMonth := d.daysInMonth(month, year)
 	var dayGroups []TimeGroupDivision
@@ -221,6 +283,14 @@ func (d *DailyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	return dayGroups
 }
 
+// GroupsSerializedToString: serialize the date in a way that need the filter example "2023-01-02" --> "Jan 2"
+//
+// Parameters:
+// startDate
+// endDate
+//
+// Returns:
+// return the date with in a correct way "Jan 2"
 func (d *DailyFilter) GroupsSerializedToString(startDate time.Time, endDate time.Time) string {
 	if startDate.After(endDate) {
 		return ""
@@ -229,6 +299,14 @@ func (d *DailyFilter) GroupsSerializedToString(startDate time.Time, endDate time
 }
 
 // Week Filter
+// GroupDivision: do the group division for a weekly filter
+//
+// Parameters:
+// month
+// year
+//
+// Returns:
+// return the time group division for a weekly filter
 func (w *WeeklyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	daysInMonth := w.daysInMonth(month, year)
 	var weekGroups []TimeGroupDivision
@@ -250,6 +328,14 @@ func (w *WeeklyFilter) GroupDivision(month, year int) []TimeGroupDivision {
 	return weekGroups
 }
 
+// GroupsSerializedToString: serialize the date in a way that need the filter example "2023-01-02" "2023-01-08" --> "Jan 2 - Jan 8"
+//
+// Parameters:
+// startDate
+// endDate
+//
+// Returns:
+// return the date with in a correct way "Jan 2 - Jan 8"
 func (w *WeeklyFilter) GroupsSerializedToString(startDate time.Time, endDate time.Time) string {
 	if startDate.After(endDate) {
 		return ""

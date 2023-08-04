@@ -32,6 +32,13 @@ func NewPowerConsumptionService(mysqlRepository domain.MySQLPowerConsumptionRepo
 	}
 }
 
+// ReduceInformation: reduce the information a only one record by group division
+//
+// Parameters:
+// groupConsumptions: has the information matched between groups and information
+//
+// Returns:
+// return reduced and one record by group division
 func (s *PowerConsumptionServiceImpl) CheckingQueryParamConstrains(meterIDs string, kindPeriod string, startDate string, endDate string) (*domain.UserConsumptionQueryParams, error) {
 	var numberArrayMeterIDs []int
 	timeStartDate, err := domain.StrToDate(startDate)
@@ -79,6 +86,18 @@ func (s *PowerConsumptionServiceImpl) CheckingQueryParamConstrains(meterIDs stri
 	}, nil
 }
 
+// GetConsumptionByMeterIDAndWindowTime: this function check the query params for see if everithing it's ok then
+// create a go routine by meter get all the information regarding this meter in a specific window time and then
+// organize the information and return it
+//
+// Parameters:
+// meterIDs: has all meterids
+// startDate: has the date to start findings
+// endDate: has the date to end findings
+// kindPeriod: the period of time to organize the information
+//
+// Returns:
+// return reduced and one record by group division
 func (s *PowerConsumptionServiceImpl) GetConsumptionByMeterIDAndWindowTime(meterIDs, startDate, endDate, kindPeriod string) ([]Serializer, error) {
 
 	chekedQueryParams, err := s.CheckingQueryParamConstrains(meterIDs, kindPeriod, startDate, endDate)
@@ -129,6 +148,16 @@ func (s *PowerConsumptionServiceImpl) GetConsumptionByMeterIDAndWindowTime(meter
 	return allUserConsumptions, nil
 }
 
+// ChekingKindPeriod: this function check if the kind of period is allowed
+//
+// Parameters:
+// meterIDs: has all meterids
+// startDate: has the date to start findings
+// endDate: has the date to end findings
+// kindPeriod: the period of time to organize the information
+//
+// Returns:
+// return reduced and one record by group division
 func (s *PowerConsumptionServiceImpl) ChekingKindPeriod(kindPeriod string) (string, error) {
 	lowerCaseKindPeriod := strings.ToLower(kindPeriod)
 	trimAndLowerCaseKindPeriod := strings.Trim(lowerCaseKindPeriod, " ")
@@ -144,6 +173,14 @@ func (s *PowerConsumptionServiceImpl) ChekingKindPeriod(kindPeriod string) (stri
 	}
 }
 
+// ImportCsvToDatabase: this function convert and multipart file with extension csv to struct then push the information
+// in the database
+//
+// Parameters:
+// file
+//
+// Returns:
+// return and error if the function fails or nil if it's not
 func (s *PowerConsumptionServiceImpl) ImportCsvToDatabase(file *multipart.File) error {
 	csvUsersConsumption, err := s.csvRepository.ConvertCSVToStruct(file)
 	var usersConsumption []*domain.UserConsumption

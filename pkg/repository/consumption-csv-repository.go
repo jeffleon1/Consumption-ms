@@ -14,6 +14,13 @@ func NewCSVConsumptionRepository() domain.CSVPowerConsumptionRepository {
 	return &CSVConsumptionRepositoryImpl{}
 }
 
+// ConvertCSVToStruct: converts a csv file in a struct
+//
+// Parámeters:
+// file - File to convert in struct.
+//
+// Returns:
+// The struct that repesents the database domain
 func (c *CSVConsumptionRepositoryImpl) ConvertCSVToStruct(file *multipart.File) ([]*domain.CSVUserConsumption, error) {
 	var userConsumption []*domain.CSVUserConsumption
 	if err := gocsv.UnmarshalMultipartFile(file, &userConsumption); err != nil {

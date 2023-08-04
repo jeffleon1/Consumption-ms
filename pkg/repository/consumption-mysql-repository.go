@@ -19,6 +19,15 @@ func NewMySQLPowerConsumptionRepository(db *gorm.DB) domain.MySQLPowerConsumptio
 	}
 }
 
+// GetConsumptionByMeterIDAndWindowTime: get all the records in a window time for a meter
+//
+// Parámeters:
+// startDate - the start date to find the records.
+// endDate - the end date to find the records.
+// meterID - the meter id to find the records.
+//
+// Returns:
+// return an array that represents the database domain
 func (p *MySQLPowerConsumptionRepositoryImpl) GetConsumptionByMeterIDAndWindowTime(startDate, endDate time.Time, meterID int) ([]domain.UserConsumption, error) {
 	var userPowerConsumption []domain.UserConsumption
 	err := p.db.Where("date BETWEEN ? AND ? AND meter_id=?", startDate, endDate, meterID).Find(&userPowerConsumption).Error
@@ -31,6 +40,13 @@ func (p *MySQLPowerConsumptionRepositoryImpl) GetConsumptionByMeterIDAndWindowTi
 
 }
 
+// CreatePowerConsumptionRecords: create a records for user power consumption
+//
+// Parámeters:
+// usersPowerConsumption - user power consumption domain.
+//
+// Returns:
+// return an error if something goes wrong in the insertion of nil if it's not
 func (p *MySQLPowerConsumptionRepositoryImpl) CreatePowerConsumptionRecords(usersPowerConsumption []*domain.UserConsumption) error {
 	recordSize := len(usersPowerConsumption)
 	recordLimit := 4000
@@ -54,6 +70,10 @@ func (p *MySQLPowerConsumptionRepositoryImpl) CreatePowerConsumptionRecords(user
 
 }
 
+// ModelMigration: do the model migration to gorm
+//
+// Returns:
+// return an error if something goes wrong in the migration of nil if it's not
 func (p *MySQLPowerConsumptionRepositoryImpl) ModelMigration() error {
 	return p.db.AutoMigrate(&domain.UserConsumption{})
 }
