@@ -11,13 +11,19 @@ macOS:
 `brew install make`
 
 __1.)__ Run without docker or air
+
 `make run`
+
 __2.)__ Run with air ( air is a Live Reload tool excellent for development )
+
 `make run-air`
 
 __3.)__ Run with docker
+
 `make run-docker`
+
 once you no longer need the container please run the following command
+
 `make down-docker`
 
 Once the project is up I suggest you go to the documentation built in swagger and make the request with the user
@@ -27,4 +33,6 @@ interface.
 
 ### Example:
  Example to do the request
+
  `localhost:8080/api/v1/consumption?meter_ids=1,2&start_date=2023-05-30&end_date=2023-06-20&kind_period=weekly`
+ 
